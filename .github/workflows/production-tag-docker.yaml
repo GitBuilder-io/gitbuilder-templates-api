@@ -1,0 +1,40 @@
+name: Production-CI
+
+on:
+  push:
+    branches:
+      - stable
+      - production
+
+jobs:
+  tag:
+    name: tag
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get Current Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: Setup Docker
+        uses: docker-practice/actions-setup-docker@master
+        with:
+          docker_version: 19.03.12
+          docker_channel: stable
+      - name: Add Stable and Latest tags
+        env:
+          IMAGE_NAME: gitbuilder-templates-api
+        run: |
+          set -x
+          docker version
+          echo "Logging into docker registry..."
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          echo "Pulling docker image from registry..."
+          docker pull ${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:${{ steps.package-version.outputs.current-version}}
+          echo "Pushing to Docker Registry..."
+          docker tag "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:${{ steps.package-version.outputs.current-version}}" "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:latest"
+          docker push "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:latest"
+          docker tag "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:${{ steps.package-version.outputs.current-version}}" "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:stable"
+          docker push "${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:stable"
+          echo "Tagging completed successfully!"

@@ -1,6 +1,6 @@
 const jwt = require('express-jwt')
 const jwks = require('jwks-rsa')
-const { JWKS_URI, JWT_AUDIENCE, JWT_ISSUER, JWT_SIGNING_ALTHORITHMS } = require('../config')
+const { JWKS_URI, JWT_AUDIENCE, JWT_ISSUER } = require('../config')
 
 const authCheck = jwt({
 	secret     : jwks.expressJwtSecret({

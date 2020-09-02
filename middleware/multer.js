@@ -1,27 +1,39 @@
 const multer = require('multer')
-const fs = require('fs-extra')
 const cwd = require('cwd')
+const fs = require('fs-extra')
 const { TEMPLATES_DIR } = require('../config')
 
 // Configure
 const storage = multer.diskStorage({
 	destination : (req, file, cb) => {
 		const { lang } = req.query
-		if (lang && lang.length > 0 && langDirExists(lang)) {
-			cb(null, `${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/`)
-		} else {
-			cb(null, '')
-		}
+		cb(null, `${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/`)
 	},
 	filename    : (req, file, cb) => {
 		cb(null, file.originalname)
 	}
 })
 
-const langDirExists = (lang) => {
-	return fs.pathExistsSync(`${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/`)
+const uploader = multer({
+	storage    : storage,
+	fileFilter : (req, file, cb) => {
+		const { lang } = req.query
+
+		if (!file.originalname.endsWith('.zip')) {
+			return cb(new Error(`Only *.zip files are allowed!`))
+		}
+
+		if (
+			!lang ||
+			!fs.pathExistsSync(`${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/`)
+		) {
+			return cb(new Error(`Language not selected or not supported!`))
+		}
+
+		cb(null, true)
+	}
+})
+
+module.exports = {
+	uploader
 }
-
-const uploader = multer({ storage: storage })
-
-module.exports = uploader

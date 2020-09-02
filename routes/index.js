@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { authCheck } = require('../middleware/auth')
-const uploader = require('../middleware/multer')
+const { uploader } = require('../middleware/multer')
 
 // Controllers
 const { getTemplate, uploadTemplate } = require('../controllers/templateController')

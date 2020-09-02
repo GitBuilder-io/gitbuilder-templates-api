@@ -6,7 +6,7 @@ const langDirExists = (lang) => {
 	return fs.pathExistsSync(`${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/`)
 }
 
-const getTemplate = async (req, res, next) => {
+const getTemplate = async (req, res) => {
 	const { name, lang } = req.query
 	const fullPath = `${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/${name}.zip`
 
@@ -19,7 +19,7 @@ const getTemplate = async (req, res, next) => {
 	}
 }
 
-const uploadTemplate = async (req, res, next) => {
+const uploadTemplate = async (req, res) => {
 	const files = req.files
 	const { lang } = req.query
 	if (lang && files.length > 0 && langDirExists(lang)) {

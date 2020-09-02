@@ -1,6 +1,6 @@
 {
 	"name": "gitbuilder-template-api",
-	"version": "0.1.1-alpha",
+	"version": "0.1.2-alpha",
 	"description": "API for requesting templates from k8s storage blob",
 	"main": "server.js",
 	"scripts": {

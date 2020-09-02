@@ -8,14 +8,32 @@ const langDirExists = (lang) => {
 
 const getTemplate = async (req, res) => {
 	const { name, lang } = req.query
-	const fullPath = `${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}/${name}.zip`
+	const partialPath = `${TEMPLATES_DIR !== '/data/templates' ? cwd() : ''}${TEMPLATES_DIR}/${lang}`
 
-	try {
-		console.log(`Sending ${fullPath}...`)
-		res.status(200).sendFile(fullPath)
-	} catch (err) {
-		res.status(500).send(`Problem getting requested template... ${err}`)
-		throw new Error(`Problem getting requested template...${err}`)
+	// Return list of available project templates iff lang provided but no name
+	if ((!lang && !name) || !lang) {
+		res
+			.status(500)
+			.send({ status: `Invalid Request`, message: `Must supply at least a valid template language category...` })
+		throw new Error(`Missing required parameters from request...${req.query}`)
+	}
+	if (lang && !name) {
+		let fileList = []
+		let directoryContents = await fs.readdir(`${partialPath}/`)
+
+		for await (const file of directoryContents) {
+			if (file !== '.DS_Store' && file.length > 0) fileList.push(file.split('.')[0])
+		}
+		res.status(200).send({ status: 'LIST', list: fileList })
+	} else {
+		const fullPath = `${partialPath}/${name}.zip`
+		try {
+			console.log(`Sending ${fullPath}...`)
+			res.status(200).sendFile(fullPath)
+		} catch (err) {
+			res.status(500).send(`Problem getting requested template... ${err}`)
+			throw new Error(`Problem getting requested template...${err}`)
+		}
 	}
 }
 

@@ -105,3 +105,4 @@ dist
 
 # Misc Dev dependencies
 templates/
+.DS_Store
